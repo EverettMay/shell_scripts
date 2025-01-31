@@ -1,5 +1,6 @@
 #!/usr/bin/zsh
 
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd /home/Desktop/everything
 git add .
 git cm "auto update"
