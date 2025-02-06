@@ -26,7 +26,7 @@ git add .
 git cm "auto update"
 git push
 
-cd /home/everett/Desktop/wallpaper
+cd /home/everett/Desktop/wallpapers
 git add .
 git cm "auto update"
 git push
