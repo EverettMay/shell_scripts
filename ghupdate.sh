@@ -1,121 +1,54 @@
-#!/usr/bin/zsh
-
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-cd /home/everett/Desktop/everything
-git pull
-git add .
-git cm "auto update"
-git push
-
-cd /home/everett/Desktop/homeworks
-git pull
-git add .
-git cm "auto update"
-git push
-
-cd /home/everett/Desktop/books
-git pull
-git add .
-git cm "auto update"
-git push
-
-cd /home/everett/Desktop/dotfiles
-git pull
-git add .
-git cm "auto update"
-git push
-
-cd /home/everett/Desktop/TA_files
-git pull
-git add .
-git cm "auto update"
-git push
-
-cd /home/everett/Desktop/cheatsheets
-git pull
-git add .
-git cm "auto update"
-git push
-
-cd /home/everett/Desktop/wallpapers
-git pull
-git add .
-git cm "auto update"
-git push
-
-cd /home/everett/Desktop/komowataharuka
-git pull
-git add .
-git cm "auto update"
-git push
-
-cd /home/everett/Desktop/CLRS_for_dummies
-git pull
-git add .
-git cm "auto update"
-git push
-
-cd /home/everett/Desktop/projects/website
-git pull
-git add .
-git cm "auto update"
-git push
+#!/usr/bin/env bash
 
 
-cd /home/everett/Desktop/projects/shell_scripts
-git pull
-git add .
-git cm "auto update"
-git push
+gitdirs=$(find . -type d -name ".git")
 
+for gitdir in $gitdirs; do
+  # The repository directory is the parent of the .git folder
+  repo_dir="$(dirname "$gitdir")"
 
-cd /home/everett/Desktop/projects/resume
-git pull
-git add .
-git cm "auto update"
-git push
+  echo "----------"
+  echo "Processing repository in: $repo_dir"
+  echo "----------"
 
+  # Ensure it's a valid Git repository by checking for remote
+  remote_url="$(git -C "$repo_dir" config --get remote.origin.url)"
+  if [ -z "$remote_url" ]; then
+    echo "No remote 'origin' found in $repo_dir. Skipping..."
+    continue
+  fi
 
-cd /home/everett/Desktop/projects/shell
-git pull
-git add .
-git cm "auto update"
-git push
+  # Change into the repo directory
+  pushd "$repo_dir" > /dev/null
 
+  # 1) Pull latest changes
+  echo "Pulling latest changes from $remote_url ..."
+  git pull
+  # If git pull failed (non-zero exit code => conflict or other error), skip
+  if [ $? -ne 0 ]; then
+    echo "Pull failed (possibly a merge conflict). Skipping this repo..."
+    popd > /dev/null
+    continue
+  fi
 
-cd /home/everett/Desktop/projects/blog
-git pull
-git add .
-git cm "auto update"
-git push
+  # 2) Add all changes
+  git add .
 
+  # 3) Commit if there are changes to commit
+  #    If there are no staged changes, 'git commit' exits with status 1, but that's not an error we care about.
+  if ! git diff --quiet --cached; then
+    echo "Committing changes..."
+    git commit -m "Automated commit"
+  else
+    echo "No changes to commit."
+  fi
 
-cd /home/everett/Desktop/projects/every_data_structures-algorithms_implementations
-git pull
-git add .
-git cm "auto update"
-git push
+  # 4) Push
+  echo "Pushing to $remote_url ..."
+  git push
 
-cd /home/everett/Desktop/projects/uwu
-git pull
-git add .
-git cm "auto update"
-git push
+  popd > /dev/null
+  echo
+done
 
-cd /home/everett/Desktop/projects/SMS
-git pull
-git add .
-git cm "auto update"
-git push
-
-cd /home/everett/Desktop/robocanes
-git pull
-git add .
-git cm "auto update"
-git push
-
-cd /home/everett/Desktop/packages
-git pull
-git add .
-git cm "auto update"
-git push
+echo "Done processing all local Git repositories."
