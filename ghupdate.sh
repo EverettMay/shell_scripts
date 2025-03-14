@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-set -u  # Treat unset variables as an error
-set -x
+set -u  # Treat unset variables as an errors
 
 #################################
 # 1) Identify the Desktop folder
