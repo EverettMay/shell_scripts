@@ -1,32 +1,28 @@
 #!/usr/bin/env bash
 
-set -u  # Treat unset variables as an errors
+set -u  # Treat unset variables as errors
 
 #################################
-# 1) Identify the Desktop folder
+# 1) Identify the Home directory
 #################################
-DESKTOP_PATH="${HOME}/Desktop"
+HOME_DIR="${HOME}"
 
-if [ ! -d "${DESKTOP_PATH}" ]; then
-  echo "Error: No Desktop folder found at '${DESKTOP_PATH}'."
-  echo "Please adjust the script if your Desktop path is different."
+if [ ! -d "${HOME_DIR}" ]; then
+  echo "Error: The home directory '${HOME_DIR}' does not exist."
   exit 1
 fi
 
-echo "Searching for Git repositories under: ${DESKTOP_PATH}"
+echo "Searching for Git repositories under: ${HOME_DIR}"
 echo
 
 ##########################################
-# 2) Find all .git folders on the Desktop
+# 2) Find all .git folders under HOME_DIR
 ##########################################
-# -type d       = find directories only
-# -name ".git"  = name of the .git folder
-# 2>/dev/null   = suppress "Permission denied" errors if any
-gitdirs=$(find "${DESKTOP_PATH}" -type d -name ".git" 2>/dev/null)
+gitdirs=$(find "${HOME_DIR}" -type d -name ".git" 2>/dev/null)
 
 # If none found, exit early
 if [ -z "$gitdirs" ]; then
-  echo "No Git repositories found on the Desktop."
+  echo "No Git repositories found under '${HOME_DIR}'."
   exit 0
 fi
 
@@ -48,6 +44,15 @@ for gitdir in $gitdirs; do
     echo
     continue
   fi
+
+  # Check if the remote URL refers to 'kiruko1025'
+  if [[ "$remote_url" != *"kiruko1025"* ]]; then
+    echo "Skipping repo: '$remote_url' does not appear to be for user 'kiruko1025'."
+    echo
+    continue
+  fi
+
+  echo "Remote '$remote_url' appears to be for user 'kiruko1025'. Proceeding..."
 
   # Enter the repo
   pushd "$repo_dir" > /dev/null
@@ -71,7 +76,6 @@ for gitdir in $gitdirs; do
   ################################
   # 3c) Commit if there are changes
   ################################
-  # We'll check if there's anything staged.
   if ! git diff --quiet --cached; then
     echo "Committing changes..."
     git commit -m "Automated commit"
@@ -90,4 +94,4 @@ for gitdir in $gitdirs; do
   echo
 done
 
-echo "Done processing all local Git repositories on the Desktop."
+echo "Done processing all local Git repositories under ${HOME_DIR}."
